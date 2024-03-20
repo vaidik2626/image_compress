@@ -64,7 +64,9 @@ def compress(location):
                         rgb_im.save(out_file)
                         opt = Image.open(out_file)
                     MEGABYTES = " megabytes"
-                    compressed_size = os.stat(out_file).st_size / 1024 / 1024  # Define the variable "compressed_size"
+                    compressed_size = None  # Define the variable "compressed_size"
+                    im.save(out_file)
+                    compressed_size = os.stat(out_file).st_size / 1024 / 1024
                     gain = original_size - compressed_size  # Define the variable "gain"
                     print("Compressed size: " + f'{compressed_size:,.2f}' + MEGABYTES)
                     print("Gain : " + f'{gain:,.2f}' + MEGABYTES)
