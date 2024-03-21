@@ -1,109 +1,70 @@
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import Navbar from './components/Navbar';
+import Herosection from './components/Herosection';
+import Feature from './components/Feature';
 
-const ImageUploader = () => {
+export const App = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [message, setMessage] = useState('');
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
+  
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleUpload = async () => {
     if (!selectedFile) {
-      alert('Please select an image file.');
+      setMessage('Please select a file to upload.');
       return;
     }
 
     const formData = new FormData();
-    formData.append('location', 'D:/College/sem 6/sgp/image_compress/input');
     formData.append('file', selectedFile);
 
     try {
-      const response = await axios.post('http://localhost:5000/compress', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const response = await fetch('http://localhost:5000/upload', {
+        method: 'POST',
+        body: formData
       });
-
-      console.log('Compression successful:', response.data);
-      // Optionally, display a success message to the user
-    } catch (error) {
-      console.error('Error compressing image:', error);
-      // Optionally, display an error message to the user
-    }
-  };
-
-  return (
-    <div>
-      <Navbar/>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload and Compress</button>
-    </div>
-  );
-};
-
-export default ImageUploader;
-
-
-
-/*import React, { useState } from 'react';
-import axios from 'axios';
-import Navbar from './components/Navbar';
-
-const ImageUploader = () => {
-  //const [selectedFile, setSelectedFile] = useState(null);
-  const [compressedImage, setCompressedImage] = useState(null);
-  const [file, setFile] = useState();
-    function handleChange(e) {
-        console.log(e.target.files);
-        setFile(URL.createObjectURL(e.target.files[0]));
-    }
-
-  const handleUpload = async () => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await axios.post('http://localhost:5000/compress', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data' // Set the content type header
+      
+      if (response.data.message) {
+        setMessage(response.data.message);
+        const filename = response.data.filename;
+        const compressedImageUrl = `http://localhost:5000/download/${filename}`;
+        setCompressedImageUrl(compressedImageUrl);
+      } else {
+        setMessage('Failed to upload and compress the image.');
       }
-    });
-      console.log('File uploaded successfully:', response.data);
-      setCompressedImage(response.data.path);
     } catch (error) {
-      console.error('Error uploading file:', error);
+      setMessage('An error occurred while uploading and compressing the file.');
+      console.error('Error uploading and compressing file:', error);
     }
   };
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = compressedImage;
-    link.download = 'compressed_image.jpg';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const [compressedImageUrl, setCompressedImageUrl] = useState('');
+
+  const handleDownload = async () => {
+    window.open(compressedImageUrl, '_blank');
   };
+
 
   return (
     <div>
-      <Navbar/>
-      <input type="file" onChange={handleChange} />
-      <button onClick={handleUpload} className='bg-black text-white'>Upload</button>
-      <div className='width:150px height:150px'>
-          <img src={file} />
-      </div>
-      <p>Compressed Image</p>
-      {compressedImage && (
-        <div>
-          <img src={compressedImage} alt="Compressed" />
-          <button onClick={handleDownload}>Download</button>
-        </div>
-      )}
+      <Navbar />
+      <Herosection />
+      <Feature />
+      <h1>Upload Image</h1>
+      <form onSubmit={handleSubmit}>
+        <input type="file" onChange={handleFileChange} />
+        <button type="submit">Upload</button>
+      </form>
+      {message && <p>{message}</p>}
+      {compressedImageUrl && <img src={compressedImageUrl} alt="Compressed" />}
+      {compressedImageUrl && <button onClick={handleDownload}>Download Compressed Image</button>}
     </div>
   );
-};
+}
+export default App;
 
-export default ImageUploader;*/
